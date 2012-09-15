@@ -10,18 +10,28 @@ function changeView(viewname) {
 
 /* Post to Haiku. */
 function haiku()
-{
+{	
+	var status = document.getElementById('status').value;
 	if (status == '' && picURI == '') { return false; }
 
-    var postURI = 'http://h.hatena.ne.jp/api/statuses/update.json';
-    var oauthHeader = oauth.getHeader({'method':'POST','url':postURI});
+	if (connectionStatus == 'none') {
+		navigator.notification.alert(
+			'デバイスがネットワークに接続されていないようです。接続状況を確認して再度投稿してください。', // メッセージ
+			function() {return;}, // コールバック関数
+			'投稿できません...', // タイトル
+			'OK' // ボタン名
+		);
+		return;
+	}
+	document.getElementById('postbutton').style.display = 'none';
+	document.getElementById('posting').style.display = 'block';
 
+    var oauthHeader = oauth.getHeader({'method':'POST','url':postURI});
 	var params = {
 		'keyword' : document.getElementById('keyword').value || 'id:'+hatenaID,
-	    'status'  : document.getElementById('status').value,
-	    'source'  : 'こくだ郵便局'
+	    'status'  : status,
+	    'source'  : appName
 	};
-
 	if (picURI) {
 	    var options = new FileUploadOptions();
 	    options.fileKey="file";
@@ -41,16 +51,24 @@ function haiku()
 
 function haikuSuccess() {
 	var ps = document.getElementById('postSuccess');
-	ps.style.zIndex = "5"; ps.style.opacity = "0.8";
-	document.getElementById('keyword').value = "";
-	document.getElementById('status').value = "";
+	ps.style.zIndex = '5';
+	ps.style.opacity = '0.8';
+	document.getElementById('keyword').value = '';
+	document.getElementById('status').value = '';
     picURI = '';
-	document.getElementById('picture').style.display = "none";
-	setTimeout(function(){ document.getElementById('postSuccess').style.opacity = "0"; }, 3000);
-	setTimeOut(function(){ document.getElementById('postSuccess').style.zIndex = "-2"; }, 3300);
+	document.getElementById('picture').style.display = 'none';
+	document.getElementById('postbutton').style.display = 'block';
+	document.getElementById('posting').style.display = 'none';
+	setTimeout(function(){ document.getElementById('postSuccess').style.opacity = '0'; }, 2500);
+	setTimeout(function(){ document.getElementById('postSuccess').style.zIndex = '-2'; }, 2550);
 }
 function haikuFailed() {
-	alert("Uh…");
+	navigator.notification.alert(
+			'だいたいはネットワーク接続まわりか、認証が無効化してしまったとか、そんな感じです。あきらめないで！', // メッセージ
+			function() {return;}, // コールバック関数
+			'投稿に失敗しました...', // タイトル
+			'OK' // ボタン名
+	);
 }
 
 /* Keyword Picker */

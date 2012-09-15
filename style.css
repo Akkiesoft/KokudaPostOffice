@@ -72,16 +72,18 @@ input,select {
 	margin: 3px 0;
 	padding:2px;
 	width:95%;
-	font-size:16pt;
+	font-size:12pt;
 	border-radius:10px;
 }
 
-textarea {
+textarea#status {
 	padding:2px;
 	width:95%;
-	font-size:16pt;
+	font-size:12pt;
 	border-radius:10px;
 }
+
+#posting { display:none;text-align:center; }
 
 .notify {
 	position:absolute;

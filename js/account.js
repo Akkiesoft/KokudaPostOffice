@@ -38,6 +38,12 @@ function auth()
 			localStorage['tokenSecret'] = oauth.getAccessTokenSecret();
 			document.getElementById('navibar').style.display = 'block';
 			changeView('viewmain');
+			navigator.notification.alert(
+				'ログインできました。', // メッセージ
+				function() {return;}, // コールバック関数
+					'ログイン成功', // タイトル
+					'OK' // ボタン名
+			);
 			oauth.getJSON(
 				"http://h.hatena.ne.jp/api/statuses/user_timeline.json?count=1",
 				function (data) {
@@ -64,26 +70,33 @@ function setAccountInformation()
 		'<div style="height:70px;margin:10px 0;"><img src="' + userIconURL + '" style="float:left; margin:0 10px;">次のユーザーとしてログイン中<br>id:' + localStorage['hatenaID'] + '</div><br style="clear:both;">' +
 		'<input type="button" value="ログアウト" onClick="return logout()">';
 
-	document.getElementById('favoriteKeys').style.display = "block";
-	oauth.getJSON("http://h.hatena.ne.jp/api/statuses/keywords.json?without_related_keywords=1&callback=?",
-		function(data){
-			document.getElementById("keyPickerFromUserMenu").innerHTML = parseJSONforKeyPicker(data);
-		},
-        function(data){
-            alert('お気に入りキーワードの取得に失敗しました。。。');
-        }
-	);
+	if (connectionStatus != 'none') {
+		document.getElementById('favoriteKeys').style.display = "block";
+		oauth.getJSON("http://h.hatena.ne.jp/api/statuses/keywords.json?without_related_keywords=1&callback=?",
+					  function(data){
+						document.getElementById("keyPickerFromUserMenu").innerHTML = parseJSONforKeyPicker(data);
+					  },
+					  function(data){
+						alert('お気に入りキーワードの取得に失敗しました。。。');
+					  }
+		);
+	}
 }
 
 function logout()
 {
-	if (confirm('ログアウトしてもよろしいですか？')) {
-		window.localStorage.clear();
-		location.reload();
-		return true;
-	} else {
-		return false;
-	}
+	navigator.notification.confirm(
+		'ログアウトしてもよろしいですか？', // メッセージ
+		function(buttonIndex){
+			if (buttonIndex == 1) {
+				window.localStorage.clear();
+				location.reload();
+			} else {
+				return false;
+			}
+		},
+		'確認', // タイトル
+		'はい,いいえ' // ボタン
+	);
 }
-
 
