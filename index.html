@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+	
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Expires" content="0">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<title>こくだ郵便局</title>
+		<link rel="StyleSheet" href="style.css">
+	</head>
+	
+	<body>
+	<div id="title">
+		<h1><img src="title.png"></h1>
+	</div>
+	<div id="body">
+		<div id="viewmain">
+			<div class="box">
+				お題 (省略可能)<br>
+				<input id="keyword" name="keyword" value="">
+			</div>
+			<div class="box">
+				本文<br>
+				<textarea id="status" name="status" rows="5"></textarea><br>
+				<img src="hoge.png" id="picture" style="height:120px;display:none;">
+			</div>
+			<div class="box">
+				<div id="posting"><input type="button" onClick="haiku()" value="Haiku!"></div>
+			</div>
+		</div>
+		
+		<div id="viewkeypicker" style="display:none;">
+			<div class="pagetitle">キーワードピッカー</div>
+			<div class="box">
+				キーワードを検索する<br>
+				<form name="keySearch" onsubmit="return keywordSearch(document.keySearch)" method="post">
+					<input name="searchWord" class="keyPickerObject"><input type="submit" value="検索">
+				</form>
+				<div id="keySearchResult"></div>
+			</div>
+			<div class="box" id="favoriteKeys" style="display:none">
+				お気に入りキーワードから選ぶ<br>
+				<div id="keyPickerFromUserMenu"><img src="loading.gif"></div>
+			</div>
+			<div class="box">
+				人気のキーワードから選ぶ<br>
+				<div id="keyPickerFromHotKeys"><img src="loading.gif"></div>
+			</div>
+		</div>
+
+		<div id="viewaccount" style="display:none;">
+			<div class="pagetitle">アカウント情報</div>
+			<div id="accountStatus" class="box"><img src="loading.gif"></div>
+		</div>
+		
+		<span id="viewStatus" class="viewmain"></span>
+	</div>
+	<div id="navibar">
+        <div class="naviitem" onClick="changeView('viewmain')"><img src="wanmajin.png"><br>投稿</div>
+        <div class="naviitem" onClick="changeView('viewkeypicker')"><img src="keyword.png"><br>お題を探す</div>
+        <div class="naviitem" onClick="cameraCapture()"><img src="camera.png"><br>カメラ撮影</div>
+        <div class="naviitem" onClick="picFileCapture()"><img src="picture.png"><br>画像添付</div>
+		<div class="naviitem" onClick="changeView('viewaccount')"><img src="account.png"><br>アカウント</div>
+	</div>
+	<script type="text/javascript" src="js/cordova-2.0.0.js"></script>
+	<script type="text/javascript" src="js/jquery-1.8.0.min.js"></script>
+	<script type="text/javascript" src="js/jsOAuth-1.3.4.js"></script>
+	<script type="text/javascript" src="js/postoffice.js"></script>
+	<script type="text/javascript" src="js/account.js"></script>
+<script type="text/javascript">
+
+var oauth;
+var hatenaID;
+var userIconURL;
+var accessToken;
+var accessTokenSecret;
+var accountStatus;
+var picURI;
+
+document.addEventListener("deviceready", onDeviceReady, false);
+
+function onDeviceReady() {
+	oauth = OAuth(options);
+	hatenaID			= window.localStorage.getItem('hatenaID') || "";
+	userIconURL			= window.localStorage.getItem('userIconURL') || "";
+	accessToken			= window.localStorage.getItem('token') || "";
+	accessTokenSecret	= window.localStorage.getItem('tokenSecret') || "";
+	accountStatus = document.getElementById('accountStatus');
+
+	$.getJSON("http://h.hatena.ne.jp/api/keywords/hot.json?without_related_keywords=1&callback=?",
+		function(data){
+			document.getElementById("keyPickerFromHotKeys").innerHTML = parseJSONforKeyPicker(data);
+		}
+	);
+
+	if (accessToken && accessTokenSecret) {
+		// ログイン済
+		oauth.setAccessToken([accessToken, accessTokenSecret]);
+		setAccountInformation();
+	} else {
+		// 非ログイン
+		document.getElementById('navibar').style.display = 'none';
+		changeView('viewaccount');
+        if (device.platform == 'Android') {
+            navigator.app.clearCache();
+        }
+		setLoginForm("");
+	}
+};
+
+	</script>
+        
+    <div id="postSuccess" class="notify">
+        <img src="wanmajin.png"><br>
+        投稿できたぞ！
+    </div>
+	</body>
+</html>
